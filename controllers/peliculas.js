@@ -27,4 +27,30 @@ const getPeliculas = async (req = request, res = response) =>{
     }
 }
 
-module.exports = {getPeliculas}
+const getPeliculasByID = async (req = request, res = response) =>{
+    
+    const {id} = req.params
+    let conn;
+    
+    try {
+        conn = await pool.getConnection()
+        
+        const [peliculas] = await conn.query(modeloPeliculas.querygetPeliculasByID, [id], (error) => {throw new Error(error) })
+        
+        if (!peliculas) {
+            res.status(404).json({msg: `No se encontró registro de la pelicula con el ID ${id}`})
+            return
+        }
+        res.json({peliculas})
+        
+    } catch (error) {
+        console.log(error)
+        res.status(500).json({error})
+    }finally{
+        if(conn){
+            conn.end()
+        }
+    }
+}
+
+module.exports = {getPeliculas,getPeliculasByID}
