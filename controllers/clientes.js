@@ -53,4 +53,31 @@ const getClientesByID = async (req = request, res = response) =>{
     }
 }
 
-module.exports = {getClientes,getClientesByID}
+const deleteClientesByID = async (req = request, res = response) =>{
+    
+    const {id} = req.query
+    let conn;
+    
+    try {
+        conn = await pool.getConnection()
+       
+        const {affectedRows} = await conn.query(modeloClientes.querydeleteClientesByID, [id], (error) => {throw new Error(error) })
+       
+        if (!affectedRows === 0) {
+            res.status(404).json({msg: `No se pudo eliminar el cliente con el ID ${id}`})
+            return
+        }
+ 
+        res.json({msg: `El cliente con ID ${id} se elimino sastifactoriamente. `})
+        
+    } catch (error) {
+        console.log(error)
+        res.status(500).json({error})
+    }finally{
+        if(conn){
+            conn.end()
+        }
+    }
+}
+
+module.exports = {getClientes,getClientesByID,deleteClientesByID}
