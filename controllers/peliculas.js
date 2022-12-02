@@ -53,4 +53,33 @@ const getPeliculasByID = async (req = request, res = response) =>{
     }
 }
 
-module.exports = {getPeliculas,getPeliculasByID}
+const deleteTPeliculasByID = async (req = request, res = response) =>{
+    
+    const {id} = req.query
+    let conn;
+    
+    try {
+        conn = await pool.getConnection()
+       
+        const {affectedRows} = await conn.query(modeloPeliculas.querydeleteTPeliculasByID, [id], (error) => {throw new Error(error) })
+       
+        if (!affectedRows === 0) {
+            res.status(404).json({msg: `No se pudo dar de baja la Pelicula con el ID ${id}`})
+            return
+        }
+ 
+        res.json({msg: `La pelicula con ID ${id} se dio de baja sastifactoriamente. `})
+        
+    } catch (error) {
+        console.log(error)
+        res.status(500).json({error})
+    }finally{
+        if(conn){
+            conn.end()
+        }
+    }
+}
+
+
+
+module.exports = {getPeliculas,getPeliculasByID, deleteTPeliculasByID}
