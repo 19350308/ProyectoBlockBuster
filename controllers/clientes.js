@@ -80,4 +80,70 @@ const deleteClientesByID = async (req = request, res = response) =>{
     }
 }
 
-module.exports = {getClientes,getClientesByID,deleteClientesByID}
+const addClientes = async (req = request, res = response) =>{
+    
+    const {
+        Correo,
+        Nombre,
+        Apellidos,
+        Edad,
+        Genero,
+        Contrasena,
+        Fecha_Nacimiento,
+        Activo
+    } = req.body
+
+    if (
+        !Correo ||
+        !Nombre ||
+        !Apellidos ||
+        !Edad ||
+        !Genero ||
+        !Activo
+    ){
+        res.status(400).json({msg: "Falta información del Cliente"})
+        return
+    }
+
+    let conn;
+    
+    try {
+        conn = await pool.getConnection()
+        
+
+        const [user] = await conn.query(modeloClientes.queryClientesExists, [Correo])
+
+        if (user) {
+            res.status(403).json({msg: `El CLiente ${Correo} ya se encuentra registrado.`})
+            return
+        }
+
+        const {affectedRows} = await conn.query(modeloClientes.queryaddClientes, 
+        [Correo,
+        Nombre,
+        Apellidos,
+        Edad,
+        Genero,
+        Contrasena,
+        Fecha_Nacimiento,
+        Activo
+    ], (error) => {throw new Error(error) })
+        
+        if (!affectedRows === 0) {
+            res.status(404).json({msg: `No se pudo agregar el registro del Cliente ${Correo}`})
+            return
+        }
+ 
+        res.json({msg: `El Cliente ${Correo} se agrego sastifactoriamente. `})
+        
+    } catch (error) {
+        console.log(error)
+        res.status(500).json({error})
+    }finally{
+        if(conn){
+            conn.end()
+        }
+    }
+}
+
+module.exports = {getClientes,getClientesByID,deleteClientesByID,addClientes}
