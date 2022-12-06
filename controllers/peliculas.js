@@ -80,6 +80,66 @@ const deleteTPeliculasByID = async (req = request, res = response) =>{
     }
 }
 
+const addPeliculas = async (req = request, res = response) =>{
+    
+    const {
+        Nombre,
+        Genero,
+        Fecha_E,
+        Autor,
+        Disponible,
+        Idioma
+    } = req.body
 
+    if (
+        !Nombre ||
+        !Genero ||
+        !Fecha_E ||
+        !Disponible ||
+        !Autor ||
+        !Idioma
+    ){
+        res.status(400).json({msg: "Falta información de la Pelicula"})
+        return
+    }
 
-module.exports = {getPeliculas,getPeliculasByID, deleteTPeliculasByID}
+    let conn;
+    
+    try {
+        conn = await pool.getConnection()
+        
+
+        const [user] = await conn.query(modeloPeliculas.queryPeliculasExists, [Nombre])
+
+        if (user) {
+            res.status(403).json({msg: `La Pelicula ${Nombre} ya se encuentra registrado.`})
+            return
+        }
+
+        const {affectedRows} = await conn.query(modeloPeliculas.queryaddPeliculas, 
+        [Nombre,
+        Genero,
+        Fecha_E,
+        Autor,
+        Disponible,
+        Idioma
+    ], (error) => {throw new Error(error) })
+        
+        if (!affectedRows === 0) {
+            res.status(404).json({msg: `No se pudo agregar la Pelicula ${Nombre}`})
+            return
+        }
+ 
+        res.json({msg: `La Pelicula ${Nombre} se agrego sastifactoriamente. `})
+        
+    } catch (error) {
+        console.log(error)
+        res.status(500).json({error})
+    }finally{
+        if(conn){
+            conn.end()
+        }
+    }
+}
+
+module.exports = {getPeliculas,getPeliculasByID, deleteTPeliculasByID, addPeliculas}

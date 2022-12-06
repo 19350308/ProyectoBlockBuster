@@ -114,7 +114,7 @@ const addClientes = async (req = request, res = response) =>{
         const [user] = await conn.query(modeloClientes.queryClientesExists, [Correo])
 
         if (user) {
-            res.status(403).json({msg: `El CLiente ${Correo} ya se encuentra registrado.`})
+            res.status(403).json({msg: `El Cliente ${Correo} ya se encuentra registrado.`})
             return
         }
 
