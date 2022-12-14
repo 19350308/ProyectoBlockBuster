@@ -119,13 +119,15 @@ const addClientes = async (req = request, res = response) =>{
             return
         }
 
+        const salt = bcryptjs.genSaltSync()
+        const ContrasenaCifrada = bcryptjs.hashSync(Contrasena,salt)
         const {affectedRows} = await conn.query(modeloClientes.queryaddClientes, 
         [Correo,
         Nombre,
         Apellidos,
         Edad,
         Genero,
-        Contrasena,
+        ContrasenaCifrada,
         Fecha_Nacimiento,
         Activo
     ], (error) => {throw new Error(error) })
@@ -213,42 +215,42 @@ const updateClientesByUsuario = async (req = request, res = response) =>{
     }
 }
 
-const signIn = async (req = request, res = response) =>{   
+const signIn = async (req=request,res=response)=>{
     const {
         Correo,
         Contrasena
-    } = req.body
+    }=req.body
 
-    if (
+    if(
         !Correo||
-        !Contrasena 
+        !Contrasena
     ){
-        res.status(400).json({msg: "Falta información del Cliente"})
+        res.status(400).json({msg:"Falta información del cliente."})
         return
     }
 
     let conn;
-    
-    try {
-        conn = await pool.getConnection()
-        const [user] = await conn.query(modeloClientes.querySignIn, [Correo])
 
-        if (!user || user.Activo == 'N') {
+    try{
+        conn = await pool.getConnection()
+        const [user]=await conn.query(modeloClientes.querySignIn,[Correo])
+
+        if(!user || user.Activo == 'N'){
             let code = !user ? 1: 2;
-            res.status(403).json({msg: `El Cliente o la contraseña son incorrectos.`, errorCode: code})
+            res.status(403).json({msg:`El usuario o la contraseña son incorrectos`,errorCode:code})
             return
         }
 
         const accesoValido = bcryptjs.compareSync(Contrasena,user.Contrasena)
 
-        if(!accesoValido) {
-            res.status(403).json({msg: `El Cliente o la contraseña son incorrectos.`, errorCode:"3"})
-            return  
+        if(!accesoValido){
+            res.status(403).json({msg:`El usuario o la contraseña son incorrectos`,errorCode:"3"})
+            return
         }
- 
-        res.json({msg: `El Cliente ${Correo} ha iniciado sesión sastifactoriamente. `})
-        
-    } catch (error) {
+
+
+        res.json({msg:`El cliente ${Correo} ha iniciado seción satisfactoriamenente`})
+    }catch(error){
         console.log(error)
         res.status(500).json({error})
     }finally{
