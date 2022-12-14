@@ -17,6 +17,18 @@ const modeloPeliculas = {
         ?,
         ?,
         ?,
-        ?)`
+        ?)`,
+    queryGetPeliculasInfo:
+    `SELECT Nombre, Genero, Fecha_E, Autor, Disponible, Idioma
+            FROM Peliculas 
+            WHERE Nombre = ?`,
+    queryUpdateByPeliculas:
+    `UPDATE Peliculas SET  
+                Genero = ?,
+                Fecha_E = ?,
+                Autor = ?,
+                Disponible = ?,
+                Idioma = ?
+                WHERE Nombre = ?`
 }
     module.exports = {modeloPeliculas}

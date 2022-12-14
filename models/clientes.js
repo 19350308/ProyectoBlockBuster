@@ -21,7 +21,22 @@ const modeloClientes = {
         ?,
         ?,
         ?,
-        ?)`
+        ?)`,
+    queryGetClientesInfo:
+    `SELECT Correo, Nombre, Apellidos, Edad, Genero, Contrasena, Fecha_Nacimiento
+            FROM Clientes 
+            WHERE Correo = ?`,
+    queryUpdateByClientes:
+    `UPDATE Clientes SET  
+                Nombre = ?,
+                Apellidos = ?,
+                Edad = ?,
+                Genero = ?,
+                Contrasena = ?,
+                Fecha_Nacimiento = ?
+                WHERE Correo = ?`
 }
+
+
 
     module.exports = {modeloClientes}

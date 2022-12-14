@@ -142,4 +142,67 @@ const addPeliculas = async (req = request, res = response) =>{
     }
 }
 
-module.exports = {getPeliculas,getPeliculasByID, deleteTPeliculasByID, addPeliculas}
+const updatePeliculasByNombre = async (req = request, res = response) =>{
+    
+    const {
+        Nombre,
+        Genero,
+        Fecha_E,
+        Autor,
+        Disponible,
+        Idioma
+    } = req.body
+
+    if (
+        !Nombre ||
+        !Genero ||
+        !Fecha_E ||
+        !Autor ||
+        !Disponible ||
+        !Idioma 
+    ) {
+        res.status(400).json({msg: "Falta información de la pelicula"})
+        return
+    }
+
+    let conn;
+    
+    try {
+        conn = await pool.getConnection()
+        
+
+        const [user] = await conn.query(modeloPeliculas.queryGetPeliculasInfo, [Nombre])
+        
+        if (!user) {
+            res.status(403).json({msg: `La Pelicula ${Nombre} no se encuentra registrado.`})
+            return
+        }
+         
+        const {affectedRows} = await conn.query(modeloPeliculas.queryUpdateByPeliculas,
+            [
+            Genero || user.Genero,
+            Fecha_E || user.Fecha_E,
+            Autor  || user.Autor,
+            Disponible  || user.Disponible,
+            Idioma || user.Idioma,
+            Nombre
+            ], (error) => {throw new Error(error) })
+        
+        if (!affectedRows === 0) {
+            res.status(404).json({msg: `No se pudo agregar el registro de la pelicula ${Nombre}`})
+            return
+        }
+ 
+        res.json({msg: `La Pelicula ${Nombre} se actualizó sastifactoriamente. `})
+        
+    } catch (error) {
+        console.log(error)
+        res.status(500).json({error})
+    }finally{
+        if(conn){
+            conn.end()
+        }
+    }
+}
+
+module.exports = {getPeliculas,getPeliculasByID, deleteTPeliculasByID, addPeliculas,updatePeliculasByNombre}
