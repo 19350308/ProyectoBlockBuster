@@ -1,6 +1,7 @@
 const express = require('express') 
 const clientesRouter = require('./routes/clientes')
 const peliculasRouter = require('./routes/peliculas')
+const prestamosRouter = require('./routes/prestamos')
 const cors = require("cors")
 
 class Server{
@@ -8,7 +9,8 @@ class Server{
       this.app = express()
       this.paths = {
          clientes:"/api/v1/clientes",
-         peliculas:"/api/v1/peliculas"
+         peliculas:"/api/v1/peliculas",
+         prestamos:"/api/v1/prestamos"
         }
         this.middlewares() 
         this.routes()
@@ -22,6 +24,7 @@ routes(){
     //  }
     this.app.use(this.paths.clientes, clientesRouter)
     this.app.use(this.paths.peliculas, peliculasRouter)
+    this.app.use(this.paths.prestamos, prestamosRouter)
 }
 
 middlewares() {

@@ -34,7 +34,9 @@ const modeloClientes = {
                 Genero = ?,
                 Contrasena = ?,
                 Fecha_Nacimiento = ?
-                WHERE Correo = ?`
+                WHERE Correo = ?`,
+
+    querySignIn: `SELECT Correo, Contrasena, Activo FROM Clientes WHERE Correo = ?`
 }
 
 

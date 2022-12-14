@@ -1,5 +1,6 @@
 const { request, response } = require("express");
 const pool = require("../db/connection");
+const bcryptjs = require("bcryptjs")
 const {modeloClientes} = require("../models/clientes");
 
 const getClientes = async (req = request, res = response) =>{
@@ -212,4 +213,49 @@ const updateClientesByUsuario = async (req = request, res = response) =>{
     }
 }
 
-module.exports = {getClientes,getClientesByID,deleteClientesByID,addClientes,updateClientesByUsuario}
+const signIn = async (req = request, res = response) =>{   
+    const {
+        Correo,
+        Contrasena
+    } = req.body
+
+    if (
+        !Correo||
+        !Contrasena 
+    ){
+        res.status(400).json({msg: "Falta información del Cliente"})
+        return
+    }
+
+    let conn;
+    
+    try {
+        conn = await pool.getConnection()
+        const [user] = await conn.query(modeloClientes.querySignIn, [Correo])
+
+        if (!user || user.Activo == 'N') {
+            let code = !user ? 1: 2;
+            res.status(403).json({msg: `El Cliente o la contraseña son incorrectos.`, errorCode: code})
+            return
+        }
+
+        const accesoValido = bcryptjs.compareSync(Contrasena,user.Contrasena)
+
+        if(!accesoValido) {
+            res.status(403).json({msg: `El Cliente o la contraseña son incorrectos.`, errorCode:"3"})
+            return  
+        }
+ 
+        res.json({msg: `El Cliente ${Correo} ha iniciado sesión sastifactoriamente. `})
+        
+    } catch (error) {
+        console.log(error)
+        res.status(500).json({error})
+    }finally{
+        if(conn){
+            conn.end()
+        }
+    }
+}
+
+module.exports = {getClientes,getClientesByID,deleteClientesByID,addClientes,updateClientesByUsuario,signIn}
